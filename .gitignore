@@ -1,0 +1,7 @@
+# Ignore IDE and editor swap files
+.idea
+*.komodoproject
+*.sw
+
+# Ignore sample input files
+sample_input/
