@@ -5,3 +5,6 @@
 
 # Ignore sample input files
 sample_input/
+
+# Ignore bytecode
+*.pyc
