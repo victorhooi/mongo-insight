@@ -114,10 +114,14 @@ with open(args.input_file, 'r') as f:
         for line in chunk:
             line_counter += 1
             # zip_longest will backfill any missing values with None, so we need to handle this, otherwise we'll miss the last batch
-            if line:
+            # TODO - Properly handle loglines split over multiple lines, or lines containing just "\n"
+            if line and line.endswith("ms"):
                 # TODO This will work for 3.0 loglines only, which print out ISO8601 time - need to add in parsing 2.4/2.6 loglines
                 # Should we be parsing the timestamp into a datetime object, and localising?
-                timestamp, logline = line.split(maxsplit=1)
+                try:
+                    timestamp, logline = line.split(maxsplit=1)
+                except ValueError as e:
+                    logger.error("Error parsing line - {} - {}".format(e, line))
                 if ' connections now open)' in line:
                     connection_count = line.split("(")[1].split()[0]
                     # TODO - We should be sending an int, not a float - connection counters are integral values
