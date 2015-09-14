@@ -8,7 +8,6 @@ from serverstatus_metrics import common_metrics, mmapv1_metrics, wiredtiger_metr
 
 
 _MEASUREMENT_PREFIX = "ss_"
-_BATCH_SIZE = 50
 
 __author__ = 'victorhooi'
 
@@ -71,6 +70,7 @@ def get_metrics(measurement_name, server_status_json, metrics_to_extract, line_n
 
 
 parser = argparse.ArgumentParser(description='Parse serverStatus() output, and load it into an InfluxDB instance')
+parser.add_argument('-b', '--batch-size', default=500, help="Batch size to process before writing to InfluxDB.")
 parser.add_argument('-d', '--database', default="insight", help="Name of InfluxDB database to write to. Defaults to 'insight'.")
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
 parser.add_argument('-i', '--influxdb-host', default='localhost', help='InfluxDB instance to connect to. Defaults to localhost.')
@@ -82,7 +82,7 @@ def main():
     logger = configure_logging('parse_serverstatus')
     client = InfluxDBClient(host=args.influxdb_host, ssl=args.ssl, verify_ssl=False, port=8086, database=args.database)
     with open(args.input_file, 'r') as f:
-        for line_number, chunk in enumerate(grouper(f, _BATCH_SIZE)):
+        for line_number, chunk in enumerate(grouper(f, args.batch_size)):
             # print(line_number)
             json_points = []
             for line in chunk:

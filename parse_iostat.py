@@ -42,6 +42,7 @@ def parse_iostat(lines):
 
 
 parser = argparse.ArgumentParser(description='Parse iostat output, and load it into an InfluxDB instance')
+parser.add_argument('-b', '--batch-size', default=500, help="Batch size to process before writing to InfluxDB.")
 parser.add_argument('-d', '--database', default="insight", help="Name of InfluxDB database to write to. Defaults to 'insight'.")
 parser.add_argument('-n', '--hostname', help='Override the hostname in the iostat header')
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
@@ -64,7 +65,7 @@ def main():
         logger.info("Found hostname {}".format(hostname))
         f.__next__() # Skip the blank line
         line_counter = 2
-        for chunk_index, chunk in enumerate(grouper(parse_iostat(f), 2)):
+        for chunk_index, chunk in enumerate(grouper(parse_iostat(f), args.batch_size)):
             json_points = []
             for block in chunk:
                 if block:
