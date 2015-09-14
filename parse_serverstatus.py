@@ -70,7 +70,7 @@ def get_metrics(measurement_name, server_status_json, metrics_to_extract, line_n
 
 
 parser = argparse.ArgumentParser(description='Parse serverStatus() output, and load it into an InfluxDB instance')
-parser.add_argument('-b', '--batch-size', default=500, help="Batch size to process before writing to InfluxDB.")
+parser.add_argument('-b', '--batch-size', default=500, type=int, help="Batch size to process before writing to InfluxDB.")
 parser.add_argument('-d', '--database', default="insight", help="Name of InfluxDB database to write to. Defaults to 'insight'.")
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
 parser.add_argument('-i', '--influxdb-host', default='localhost', help='InfluxDB instance to connect to. Defaults to localhost.')
