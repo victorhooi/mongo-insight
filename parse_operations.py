@@ -73,10 +73,16 @@ def main():
                         if split_line[1].startswith("["):
                             # 2.4 Logline:
                             tags['namespace'] = split_line[3]
-                            for stat in line.split("} ")[-1].split():
-                                if ":" in stat:
+                            for stat in reversed(split_line):
+                                if "ms" in stat:
+                                    pass
+                                elif ":" in stat:
                                     key, value = stat.split(":", 1)
                                     values[key] = int(value)
+                                elif stat == "locks(micros)":
+                                    pass
+                                else:
+                                    break
                         else:
                             # 3.x logline:
                             tags['namespace'] = split_line[5]
