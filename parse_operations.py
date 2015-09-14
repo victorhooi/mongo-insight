@@ -76,7 +76,7 @@ def main():
                         for stat in reversed(pre_locks.split()):
                             if ":" in stat:
                                 key, value = stat.split(":", 1)
-                                values[key] = value
+                                values[key] = int(value)
                             else:
                                 break
                         if 'planSummary: ' in line:
