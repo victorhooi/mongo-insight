@@ -68,7 +68,7 @@ def main():
                             tags['connection_id'] = thread
                         split_line = line.split()
                         tags['namespace'] = split_line[5]
-                        values['duration_in_milliseconds'] = split_line[-1].rstrip('ms')
+                        values['duration_in_milliseconds'] = int(split_line[-1].rstrip('ms'))
                         timestamp = parse(split_line[0])
                         # TODO - Parse locks
                         pre_locks, locks = line.split("locks:{ ", 1)
