@@ -64,10 +64,12 @@ def main():
                     except IndexError as e:
                         logger.error("Unable to parse line - {} - {}".format(e, line))
                         break
-                    if tags['operation'] in ['query', 'getmore', 'insert', 'update', 'remove', 'aggregate', 'mapreduce']:
+                    if tags['operation'] in ['command', 'query', 'getmore', 'insert', 'update', 'remove', 'aggregate', 'mapreduce']:
                         # print(line.strip())
                         thread = line.split("[", 1)[1].split("]")[0]
                         # Alternately - print(split_line[3])
+                        if tags['operation'] == 'command':
+                            tags['command'] = line.split("command: ")[1].split()[0]
                         if "conn" in thread:
                             tags['connection_id'] = thread
                         split_line = line.split()
