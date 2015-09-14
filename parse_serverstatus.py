@@ -3,9 +3,9 @@ from influxdb import InfluxDBClient
 import json
 import argparse
 import sys
-from utils import get_nested_items, grouper, configure_logging
+from utils import get_nested_items, grouper, configure_logging, write_points
 from serverstatus_metrics import common_metrics, mmapv1_metrics, wiredtiger_metrics
-from requests.exceptions import RequestException
+
 
 _MEASUREMENT_PREFIX = "ss_"
 _BATCH_SIZE = 50
@@ -106,11 +106,7 @@ def main():
                         #     json_points.append(create_point(*metric))
                     except ValueError:
                         logger.error("Line {} does not appear to be valid JSON - \"{}\"".format(line_number, line.strip()))
-            try:
-                client.write_points(json_points)
-                logger.info("Wrote in {} points to InfluxDB. Processed up to line {}.".format(len(json_points), line_number))
-            except RequestException as e:
-                logger.error("Unable to connect to InfluxDB at {} - {}".format(client._host, e))
+            write_points(logger, client, json_points, line_number)
 if __name__ == "__main__":
     sys.exit(main())
 

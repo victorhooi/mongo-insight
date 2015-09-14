@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 from datetime import datetime
 from influxdb import InfluxDBClient
-from influxdb.exceptions import InfluxDBClientError, InfluxDBServerError
-from requests.exceptions import SSLError
 from pytz import timezone
 import urllib3
 import argparse
 import re
 import sys
-from utils import grouper, configure_logging
+from utils import grouper, configure_logging, write_points
+
 
 urllib3.disable_warnings()
 
@@ -64,12 +63,14 @@ def main():
             hostname = re.split(r'[()]', f.readline())[1]
         logger.info("Found hostname {}".format(hostname))
         f.__next__() # Skip the blank line
-        for chunk in grouper(parse_iostat(f), 500):
+        line_counter = 2
+        for chunk_index, chunk in enumerate(grouper(parse_iostat(f), 2)):
             json_points = []
             for block in chunk:
                 if block:
                     try:
                         for i, line in enumerate(block):
+                            line_counter += 1
                             if i == 0:
                                 timestamp = iostat_timezone.localize(line)
                                 # print(timestamp)
@@ -123,13 +124,7 @@ def main():
                         print("Bad output seen - skipping")
                         print(e)
                         print(block)
-            try:
-                client.write_points(json_points)
-                logger.info("Wrote in {} points to InfluxDB".format(len(json_points)))
-            except InfluxDBClientError as e:
-                logger.error('Unable to write to InfluxDB - {}'.format(e))
-            except SSLError as e:
-                logger.error('SSL error - {}'.format(e))
+            write_points(logger, client, json_points, line_counter)
 
 if __name__ == "__main__":
     sys.exit(main())

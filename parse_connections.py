@@ -4,6 +4,7 @@ import pprint
 import argparse
 from itertools import zip_longest
 from dateutil.parser import parse
+from utils import configure_logging, write_points
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -102,10 +103,14 @@ class CloseConnectionEvent(ConnectionEvent):
         tags['matching_connection_open'] = self.matching_connection_open
         return tags
 
+logger = configure_logging('parse_connections')
+
 with open(args.input_file, 'r') as f:
+    line_counter = 0
     for chunk in grouper(f, 100):
         json_points = []
         for line in chunk:
+            line_counter += 1
             # zip_longest will backfill any missing values with None, so we need to handle this, otherwise we'll miss the last batch
             if line:
                 # TODO This will work for 3.0 loglines only, which print out ISO8601 time - need to add in parsing 2.4/2.6 loglines
@@ -123,12 +128,7 @@ with open(args.input_file, 'r') as f:
                     json_points.append(event.get_json())
         if json_points:
             # We need to deal with 500: timeout - some kind of retry behaviour
-            try:
-                client.write_points(json_points)
-                print("Wrote in {} points.".format(len(json_points)))
-            except Exception as e:
-                print(e)
-            # print(json_points)
+            write_points(logger, client, json_points, line_counter)
         else:
             print("empty points!!!")
 

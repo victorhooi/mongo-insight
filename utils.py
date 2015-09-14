@@ -1,5 +1,8 @@
 from itertools import zip_longest
 import logging
+from requests.exceptions import RequestException
+from influxdb.exceptions import InfluxDBClientError, InfluxDBServerError
+from requests.exceptions import SSLError
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -25,3 +28,15 @@ def configure_logging(logger_name):
     ch.setFormatter(formatter)
     logger.addHandler(ch)
     return logger
+
+def write_points(logger, client, json_points, line_number):
+    # TODO - I originally wrote this to reduce code duplication - however, we need a better way to handle all the parameters
+    try:
+        client.write_points(json_points)
+        logger.info("Wrote in {} points to InfluxDB. Processed up to line {}.".format(len(json_points), line_number))
+    except RequestException as e:
+        logger.error("Unable to connect to InfluxDB at {} - {}".format(client._host, e))
+    except InfluxDBClientError as e:
+        logger.error('Unable to write to InfluxDB - {}'.format(e))
+    except SSLError as e:
+        logger.error('SSL error - {}'.format(e))
