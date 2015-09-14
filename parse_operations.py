@@ -67,26 +67,35 @@ def main():
                         if "conn" in thread:
                             tags['connection_id'] = thread
                         split_line = line.split()
-                        tags['namespace'] = split_line[5]
                         values['duration_in_milliseconds'] = int(split_line[-1].rstrip('ms'))
+                        # TODO 2.4.x timestamps have spaces
                         timestamp = parse(split_line[0])
-                        # TODO - Parse locks
-                        pre_locks, locks = line.split("locks:{ ", 1)
-                        # We work backwards from the end, until we run out of key:value pairs
-                        # TODO - Can we assume these are always integers?
-                        for stat in reversed(pre_locks.split()):
-                            if ":" in stat:
-                                key, value = stat.split(":", 1)
-                                values[key] = int(value)
-                            else:
-                                break
-                        if 'planSummary: ' in line:
-                            tags['plan_summary'] = (line.split('planSummary: ', 1)[1].split()[0])
+                        if split_line[1].startswith("["):
+                            # 2.4 Logline:
+                            tags['namespace'] = split_line[3]
+                            for stat in line.split("} ")[-1].split():
+                                if ":" in stat:
+                                    key, value = stat.split(":", 1)
+                                    values[key] = int(value)
+                        else:
+                            # 3.x logline:
+                            tags['namespace'] = split_line[5]
+                            # TODO - Parse locks
+                            pre_locks, locks = line.split("locks:{ ", 1)
+                            # We work backwards from the end, until we run out of key:value pairs
+                            # TODO - Can we assume these are always integers?
+                            for stat in reversed(pre_locks.split()):
+                                if ":" in stat:
+                                    key, value = stat.split(":", 1)
+                                    values[key] = int(value)
+                                else:
+                                    break
+                            # TODO - Parse the full query plan for IXSCAN
+                            if 'planSummary: ' in line:
+                                tags['plan_summary'] = (line.split('planSummary: ', 1)[1].split()[0])
                         json_points.append(create_point(timestamp, "operations", values, tags))
             if json_points:
-                print(len(json_points))
-                print(json_points)
-                # write_points(logger, client, json_points, line_count)
+                write_points(logger, client, json_points, line_count)
 if __name__ == "__main__":
     sys.exit(main())
 
