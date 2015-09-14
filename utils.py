@@ -3,6 +3,7 @@ import logging
 from requests.exceptions import RequestException
 from influxdb.exceptions import InfluxDBClientError, InfluxDBServerError
 from requests.exceptions import SSLError
+from retrying import retry
 
 
 def grouper(iterable, n, fillvalue=None):
@@ -29,6 +30,7 @@ def configure_logging(logger_name):
     logger.addHandler(ch)
     return logger
 
+@retry(wait_exponential_multiplier=1000, wait_exponential_max=20000)
 def write_points(logger, client, json_points, line_number):
     # TODO - I originally wrote this to reduce code duplication - however, we need a better way to handle all the parameters
     try:
