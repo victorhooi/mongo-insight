@@ -73,6 +73,7 @@ def main():
                         # TODO - Parse locks
                         pre_locks, locks = line.split("locks:{ ", 1)
                         # We work backwards from the end, until we run out of key:value pairs
+                        # TODO - Can we assume these are always integers?
                         for stat in reversed(pre_locks.split()):
                             if ":" in stat:
                                 key, value = stat.split(":", 1)
