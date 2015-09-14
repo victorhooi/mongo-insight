@@ -46,7 +46,7 @@ parser.add_argument('-d', '--database', default="insight", help="Name of InfluxD
 parser.add_argument('-n', '--hostname', help='Override the hostname in the iostat header')
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
 parser.add_argument('-t', '--timezone', required=True, help='Hostname of the source system -e.g. "UTC", "US/Eastern", or "US/Pacific"')
-parser.add_argument('-i', '--influxdb-host', default='localhost', help='InfluxDB instance to connect to. If this is not provided, we default to localhost.')
+parser.add_argument('-i', '--influxdb-host', default='localhost', help='InfluxDB instance to connect to. Defaults to localhost.')
 parser.add_argument('-s', '--ssl', action='store_true', default=False, help='Enable SSl mode for InfluxDB.')
 parser.add_argument('input_file')
 args = parser.parse_args()

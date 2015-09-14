@@ -31,6 +31,7 @@ parser = argparse.ArgumentParser(description='Parse serverStatus() output, and l
 parser.add_argument('-d', '--database', default="insight", help="Name of InfluxDB database to write to. Defaults to 'insight'.")
 parser.add_argument('-n', '--hostname', required=True, help='Host(Name) of the server')
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
+parser.add_argument('-i', '--influxdb-host', default='localhost', help='InfluxDB instance to connect to. Defaults to localhost.')
 parser.add_argument('-s', '--ssl', action='store_true', default=False, help='Enable SSl mode for InfluxDB.')
 parser.add_argument('input_file')
 args = parser.parse_args()
