@@ -59,7 +59,11 @@ def main():
                         'project': args.project,
                         'hostname': args.hostname,
                     }
-                    tags['operation'] = line.split("] ", 1)[1].split()[0]
+                    try:
+                        tags['operation'] = line.split("] ", 1)[1].split()[0]
+                    except IndexError as e:
+                        logger.error("Unable to parse line - {} - {}".format(e, line))
+                        break
                     if tags['operation'] in ['query', 'getmore', 'insert', 'update', 'remove', 'aggregate', 'mapreduce']:
                         # print(line.strip())
                         thread = line.split("[", 1)[1].split("]")[0]
