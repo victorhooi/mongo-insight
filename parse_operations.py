@@ -32,7 +32,7 @@ def create_point(timestamp, measurement_name, values, tags):
 
 
 parser = argparse.ArgumentParser(description='Parse a mongod.log logfile for query timing information, and load it into an InfluxDB instance')
-parser.add_argument('-b', '--batch-size', default=5000, help="Batch size to process before writing to InfluxDB.")
+parser.add_argument('-b', '--batch-size', default=5000, type=int, help="Batch size to process before writing to InfluxDB.")
 parser.add_argument('-d', '--database', default="insight", help="Name of InfluxDB database to write to. Defaults to 'insight'.")
 parser.add_argument('-n', '--hostname', required=True, help='Host(Name) of the server')
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
@@ -83,8 +83,9 @@ def main():
                             tags['plan_summary'] = (line.split('planSummary: ', 1)[1].split()[0])
                         json_points.append(create_point(timestamp, "operations", values, tags))
             if json_points:
+                print(len(json_points))
                 print(json_points)
-                write_points(logger, client, json_points, line_count)
+                # write_points(logger, client, json_points, line_count)
 if __name__ == "__main__":
     sys.exit(main())
 
