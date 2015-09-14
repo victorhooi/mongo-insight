@@ -9,9 +9,6 @@ pp = pprint.PrettyPrinter(indent=4)
 
 __author__ = 'victorhooi'
 
-client = InfluxDBClient(host='localhost', port=8086, database="insight")
-
-
 def create_generic_point(name, value, timestamp, tags):
     return {
         "measurement": name,
@@ -30,10 +27,14 @@ def grouper(iterable, n, fillvalue=None):
     return zip_longest(fillvalue=fillvalue, *args)
 
 parser = argparse.ArgumentParser(description='Parse serverStatus() output, and load it into an InfluxDB instance')
+parser.add_argument('-d', '--database', default="insight", help="Name of InfluxDB database to write to. Defaults to 'insight'.")
 parser.add_argument('-n', '--hostname', required=True, help='Host(Name) of the server')
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
+parser.add_argument('-s', '--ssl', action='store_true', default=False, help='Enable SSl mode for InfluxDB.')
 parser.add_argument('input_file')
 args = parser.parse_args()
+
+client = InfluxDBClient(host=args.influxdb_host, ssl=args.ssl, verify_ssl=False, port=8086, database=args.database)
 
 connections = {}
 connection_counters = []

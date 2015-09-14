@@ -71,14 +71,16 @@ def get_metrics(measurement_name, server_status_json, metrics_to_extract, line_n
 
 
 parser = argparse.ArgumentParser(description='Parse serverStatus() output, and load it into an InfluxDB instance')
+parser.add_argument('-d', '--database', default="insight", help="Name of InfluxDB database to write to. Defaults to 'insight'.")
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
 parser.add_argument('-i', '--influxdb-host', default='localhost', help='InfluxDB instance to connect to. If this is not provided, we default to localhost.')
+parser.add_argument('-s', '--ssl', action='store_true', default=False, help='Enable SSl mode for InfluxDB.')
 parser.add_argument('input_file')
 args = parser.parse_args()
 
 def main():
     logger = configure_logging('parse_serverstatus')
-    client = InfluxDBClient(host=args.influxdb_host, ssl=True, port=8086, database="insight")
+    client = InfluxDBClient(host=args.influxdb_host, ssl=args.ssl, verify_ssl=False, port=8086, database=args.database)
     with open(args.input_file, 'r') as f:
         for line_number, chunk in enumerate(grouper(f, _BATCH_SIZE)):
             # print(line_number)

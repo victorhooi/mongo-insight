@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 from datetime import datetime
 from influxdb import InfluxDBClient
+from influxdb.exceptions import InfluxDBClientError, InfluxDBServerError
+from requests.exceptions import SSLError
 from pytz import timezone
 import urllib3
 import argparse
@@ -41,16 +43,18 @@ def parse_iostat(lines):
 
 
 parser = argparse.ArgumentParser(description='Parse iostat output, and load it into an InfluxDB instance')
+parser.add_argument('-d', '--database', default="insight", help="Name of InfluxDB database to write to. Defaults to 'insight'.")
 parser.add_argument('-n', '--hostname', help='Override the hostname in the iostat header')
 parser.add_argument('-p', '--project', required=True, help='Project name to tag this with')
 parser.add_argument('-t', '--timezone', required=True, help='Hostname of the source system -e.g. "UTC", "US/Eastern", or "US/Pacific"')
 parser.add_argument('-i', '--influxdb-host', default='localhost', help='InfluxDB instance to connect to. If this is not provided, we default to localhost.')
+parser.add_argument('-s', '--ssl', action='store_true', default=False, help='Enable SSl mode for InfluxDB.')
 parser.add_argument('input_file')
 args = parser.parse_args()
 
 
 def main():
-    client = InfluxDBClient(host=args.influxdb_host, ssl=True, verify_ssl=False, port=8086, database="insight")
+    client = InfluxDBClient(host=args.influxdb_host, ssl=args.ssl, verify_ssl=False, port=8086, database=args.database)
     logger = configure_logging('parse_iostat')
     iostat_timezone = timezone(args.timezone)
     with open(args.input_file, 'r') as f:
@@ -119,9 +123,13 @@ def main():
                         print("Bad output seen - skipping")
                         print(e)
                         print(block)
-            # pp.pprint(json_points[:2])
-            client.write_points(json_points)
-            print("Wrote in {} points to InfluxDB".format(len(json_points)))
+            try:
+                client.write_points(json_points)
+                logger.info("Wrote in {} points to InfluxDB".format(len(json_points)))
+            except InfluxDBClientError as e:
+                logger.error('Unable to write to InfluxDB - {}'.format(e))
+            except SSLError as e:
+                logger.error('SSL error - {}'.format(e))
 
 if __name__ == "__main__":
     sys.exit(main())
