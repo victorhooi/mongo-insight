@@ -2,13 +2,13 @@
 from influxdb import InfluxDBClient
 import pprint
 import argparse
-from itertools import zip_longest
 from dateutil.parser import parse
-from utils import configure_logging, write_points
+from utils import grouper, configure_logging, write_points
 
 pp = pprint.PrettyPrinter(indent=4)
 
 __author__ = 'victorhooi'
+
 
 def create_generic_point(name, value, timestamp, tags):
     return {
@@ -20,12 +20,6 @@ def create_generic_point(name, value, timestamp, tags):
         }
     }
 
-
-def grouper(iterable, n, fillvalue=None):
-    "Collect data into fixed-length chunks or blocks"
-    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
-    args = [iter(iterable)] * n
-    return zip_longest(fillvalue=fillvalue, *args)
 
 parser = argparse.ArgumentParser(description='Parse serverStatus() output, and load it into an InfluxDB instance')
 parser.add_argument('-b', '--batch-size', default=500, type=int, help="Batch size to process before writing to InfluxDB.")
