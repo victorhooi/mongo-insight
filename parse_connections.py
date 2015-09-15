@@ -114,7 +114,8 @@ with open(args.input_file, 'r') as f:
             line_counter += 1
             # zip_longest will backfill any missing values with None, so we need to handle this, otherwise we'll miss the last batch
             # TODO - Properly handle loglines split over multiple lines, or lines containing just "\n"
-            if line and line.endswith("ms"):
+            if line:
+                print(line)
                 # TODO This will work for 3.0 loglines only, which print out ISO8601 time - need to add in parsing 2.4/2.6 loglines
                 # Should we be parsing the timestamp into a datetime object, and localising?
                 try:
