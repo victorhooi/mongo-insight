@@ -42,11 +42,16 @@ base_tags = {
     'hostname': args.hostname,
 }
 
+
 class ConnectionEvent:
-    # Example of an connection open
+    # Example of an connection open (3.x)
     # 2015-08-16T22:28:15.350Z I NETWORK  [initandlisten] connection accepted from 10.0.20.7:55317 #32036 (176 connections now open)
-    # Example of a connection close
+    # Example of a connection close (3.x)
     # 2015-08-16T22:28:21.908Z I NETWORK  [conn32033] end connection 10.0.20.8:58809 (176 connections now open)
+    # Example of a connection open (2.6):
+    # 2015-09-01T01:14:36.759-0700 [initandlisten] connection accepted from 10.106.154.22:44935 #334817 (1394 connections now open)
+    # Example of a connection close (2.6):
+    # 2015-09-01T01:14:42.066-0700 [conn334811] end connection 10.7.210.44:32916 (1393 connections now open)
     def __init__(self, timestamp, logline):
         self.timestamp = timestamp
 
