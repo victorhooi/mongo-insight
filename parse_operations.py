@@ -107,7 +107,11 @@ def main():
                                 tags['plan_summary'] = (line.split('planSummary: ', 1)[1].split()[0])
                         json_points.append(create_point(timestamp, "operations", values, tags))
             if json_points:
-                write_points(logger, client, json_points, line_count)
+                # TODO - We shouldn't need to wrap this in try/except - should be handled by retry decorator
+                try:
+                    write_points(logger, client, json_points, line_count)
+                except Exception as e:
+                    logger.error("Retries exceeded. Giving up on this point.")
 if __name__ == "__main__":
     sys.exit(main())
 

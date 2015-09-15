@@ -134,7 +134,11 @@ with open(args.input_file, 'r') as f:
                     json_points.append(event.get_json())
         if json_points:
             # We need to deal with 500: timeout - some kind of retry behaviour
-            write_points(logger, client, json_points, line_counter)
+            # TODO - We shouldn't need to wrap this in try/except - should be handled by retry decorator
+            try:
+                write_points(logger, client, json_points, line_counter)
+            except Exception as e:
+                logger.error("Retries exceeded. Giving up on this point.")
         else:
             print("empty points!!!")
 
