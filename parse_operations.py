@@ -93,7 +93,7 @@ def main():
                             # 3.x logline:
                             tags['namespace'] = split_line[5]
                             # TODO - Parse locks
-                            pre_locks, locks = line.split("locks:{ ", 1)
+                            pre_locks, locks = line.split("locks:{", 1)
                             # We work backwards from the end, until we run out of key:value pairs
                             # TODO - Can we assume these are always integers?
                             for stat in reversed(pre_locks.split()):
