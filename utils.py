@@ -30,15 +30,22 @@ def configure_logging(logger_name):
     logger.addHandler(ch)
     return logger
 
-@retry(wait_exponential_multiplier=1000, wait_exponential_max=20000)
+@retry(stop_max_attempt_number=5, wait_exponential_multiplier=1000, wait_exponential_max=120000)
 def write_points(logger, client, json_points, line_number):
     # TODO - I originally wrote this to reduce code duplication - however, we need a better way to handle all the parameters
+    # TODO - We need a better way to handle retry behaviour, without needing to re-raise exceptions
     try:
         client.write_points(json_points)
         logger.info("Wrote in {} points to InfluxDB. Processed up to line {}.".format(len(json_points), line_number))
     except RequestException as e:
         logger.error("Unable to connect to InfluxDB at {} - {}".format(client._host, e))
+        logger.info("Retrying...")
+        raise Exception
     except InfluxDBClientError as e:
         logger.error('Unable to write to InfluxDB - {}'.format(e))
+        logger.info("Retrying...")
+        raise Exception
     except SSLError as e:
         logger.error('SSL error - {}'.format(e))
+        logger.info("Retrying...")
+        raise Exception
