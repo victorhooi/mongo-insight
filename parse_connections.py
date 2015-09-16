@@ -122,6 +122,7 @@ with open(args.input_file, 'r') as f:
                     timestamp, logline = line.split(maxsplit=1)
                 except ValueError as e:
                     logger.error("Error parsing line - {} - {}".format(e, line))
+                    break
                 if ' connections now open)' in line:
                     connection_count = line.split("(")[1].split()[0]
                     # TODO - We should be sending an int, not a float - connection counters are integral values
