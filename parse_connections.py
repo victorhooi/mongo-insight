@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 from influxdb import InfluxDBClient
-import pprint
 import argparse
 from dateutil.parser import parse
 from utils import grouper, configure_logging, write_points
-
-pp = pprint.PrettyPrinter(indent=4)
 
 __author__ = 'victorhooi'
 
