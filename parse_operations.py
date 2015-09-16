@@ -52,8 +52,8 @@ def main():
             json_points = []
             for line in chunk:
                 # zip_longest will backfill any missing values with None, so we need to handle this, otherwise we'll miss the last batch
-                if line:
-                    line_count += 1
+                line_count += 1
+                if line and line.endswith("ms"):
                     values = {}
                     tags = {
                         'project': args.project,
