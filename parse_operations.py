@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 from influxdb import InfluxDBClient
+import flatdict
 import json
 import argparse
+import re
 import sys
 from dateutil.parser import parse
 from utils import grouper, configure_logging, write_points
@@ -62,10 +64,9 @@ def main():
                     try:
                         tags['operation'] = line.split("] ", 1)[1].split()[0]
                     except IndexError as e:
-                        logger.error("Unable to parse line - {} - {}".format(e, line))
+                        logger.error("Unable to get operation type - {} - {}".format(e, line))
                         break
                     if tags['operation'] in ['command', 'query', 'getmore', 'insert', 'update', 'remove', 'aggregate', 'mapreduce']:
-                        # print(line.strip())
                         thread = line.split("[", 1)[1].split("]")[0]
                         # Alternately - print(split_line[3])
                         if tags['operation'] == 'command':
@@ -77,6 +78,7 @@ def main():
                         # TODO 2.4.x timestamps have spaces
                         timestamp = parse(split_line[0])
                         if split_line[1].startswith("["):
+                            # TODO - Parse locks from 2.6 style loglines
                             # 2.4 Logline:
                             tags['namespace'] = split_line[3]
                             for stat in reversed(split_line):
@@ -92,8 +94,18 @@ def main():
                         else:
                             # 3.x logline:
                             tags['namespace'] = split_line[5]
-                            # TODO - Parse locks
-                            pre_locks, locks = line.split("locks:{", 1)
+                            # TODO - Should we be splitting on "locks:{" instead?
+                            pre_locks, locks = line.rsplit("locks:", 1)
+                            # Strip duration from locks
+                            locks = locks.rsplit(" ", 1)[0]
+                            # Add quotation marks around string, so that it is valid JSON
+                            locks = re.sub(r"(\w+):", "\"\g<1>\":", locks)
+                            locks_document = flatdict.FlatDict(json.loads(locks), delimiter="_")
+                            for key, value in locks_document.iteritems():
+                                values["locks_{}".format(key)] = int(value)
+
+
+
                             # We work backwards from the end, until we run out of key:value pairs
                             # TODO - Can we assume these are always integers?
                             for stat in reversed(pre_locks.split()):
@@ -106,10 +118,14 @@ def main():
                             if 'planSummary: ' in line:
                                 tags['plan_summary'] = (line.split('planSummary: ', 1)[1].split()[0])
                         json_points.append(create_point(timestamp, "operations", values, tags))
+                    else:
+                        logger.info("'{}' is not a recognised operation type - not parsing this line ({})".format(tags['operation'], line))
             if json_points:
                 # TODO - We shouldn't need to wrap this in try/except - should be handled by retry decorator
                 try:
+                    # TODO - Have a dry-run mode
                     write_points(logger, client, json_points, line_count)
+                    pass
                 except Exception as e:
                     logger.error("Retries exceeded. Giving up on this point.")
 if __name__ == "__main__":
