@@ -46,7 +46,7 @@ args = parser.parse_args()
 def main():
     client = InfluxDBClient(host=args.influxdb_host, ssl=args.ssl, verify_ssl=False, port=8086, database=args.database)
     logger = configure_logging('parse_operations')
-    with open(args.input_file, 'r') as f:
+    with open(args.input_file, 'r', encoding="latin-1") as f:
         line_count = 0
         for chunk in grouper(f, args.batch_size):
             json_points = []

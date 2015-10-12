@@ -103,7 +103,7 @@ class CloseConnectionEvent(ConnectionEvent):
 
 logger = configure_logging('parse_connections')
 
-with open(args.input_file, 'r') as f:
+with open(args.input_file, 'r', encoding='latin-1') as f:
     line_counter = 0
     for chunk in grouper(f, args.batch_size):
         json_points = []
