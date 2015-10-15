@@ -68,7 +68,13 @@ mmapv1_metrics = {
     'background_flushing_total_ms': ['backgroundFlushing', 'total_ms'],
     'background_flushing_average_ms': ['backgroundFlushing', 'average_ms'],
     'background_flushing_last_ms': ['backgroundFlushing', 'last_ms'],
-    # TODO: Add in the journalling (dur) metrics
+    'journal_commits': ['dur', 'commits'],
+    'journal_MB_written_to_journal': ['dur', 'journaledMB'],
+    'journal_MB_written_to_datafiles': ['dur', 'writeToDataFilesMB'],
+    'journal_compression': ['dur', 'compression'],
+    'journal_commits_during_write_lock': ['dur', 'commitsInWriteLock'],
+    'journal_earlycommits': ['dur', 'earlyCommits']
+    # TODO: Add in the journalling timeMS (dur.timeMS) metrics
 }
 
 # Created using:
